@@ -55,10 +55,14 @@ def _read_rgb(img_path: str | Path) -> np.ndarray:
     return np.ascontiguousarray(arr)
 
 
-def _detect_fov(rgb: np.ndarray) -> tuple[float, float, float, bool]:
+def _detect_fov(rgb: np.ndarray):
     """
-    Return (cx, cy, radius, detected). Threshold the red channel low, take the
-    largest connected component, use its centroid and equivalent-circle radius.
+    Return (mask, cx, cy, eq_radius, exp_radius, bbox, detected).
+    mask     - filled largest bright component (the actual field of view shape)
+    eq_radius- equivalent-circle radius sqrt(area/pi) of that component
+    exp_radius- half the LONGER side of the component's bounding box; this is what
+               the FOV circle *should* measure, so a one-sided black band shows up
+               as a shortfall between the component area and pi*exp_radius^2.
     """
     h, w = rgb.shape[:2]
     red = rgb[..., 0]
@@ -66,59 +70,73 @@ def _detect_fov(rgb: np.ndarray) -> tuple[float, float, float, bool]:
     binm = cv2.morphologyEx(binm, cv2.MORPH_OPEN, np.ones((5, 5), np.uint8))
 
     n, labels, stats, centroids = cv2.connectedComponentsWithStats(binm, connectivity=8)
+    fallback = (np.ones((h, w), np.uint8), w / 2, h / 2, min(h, w) / 2,
+                min(h, w) / 2, (0, 0, w, h), False)
     if n <= 1:
-        return w / 2, h / 2, min(h, w) / 2, False
-    # component 0 is background
+        return fallback
     idx = 1 + int(np.argmax(stats[1:, cv2.CC_STAT_AREA]))
-    area = stats[idx, cv2.CC_STAT_AREA]
+    area = int(stats[idx, cv2.CC_STAT_AREA])
     if area < MIN_FOV_AREA_FRAC * h * w:
-        return w / 2, h / 2, min(h, w) / 2, False
+        return fallback
+
+    mask = (labels == idx).astype(np.uint8)
+    # fill interior holes so vessels/lesions inside the FOV are kept
+    ff = mask.copy()
+    cv2.floodFill(ff, np.zeros((h + 2, w + 2), np.uint8), (0, 0), 1)
+    mask = mask | (1 - ff)
+
+    x, y, bw, bh = (stats[idx, cv2.CC_STAT_LEFT], stats[idx, cv2.CC_STAT_TOP],
+                    stats[idx, cv2.CC_STAT_WIDTH], stats[idx, cv2.CC_STAT_HEIGHT])
     cx, cy = centroids[idx]
-    radius = float(np.sqrt(area / np.pi))  # equivalent-circle radius
-    return float(cx), float(cy), radius, True
-
-
-def _circle_mask(shape: tuple[int, int], cx: float, cy: float, r: float) -> np.ndarray:
-    yy, xx = np.ogrid[:shape[0], :shape[1]]
-    return (((xx - cx) ** 2 + (yy - cy) ** 2) <= r ** 2).astype(np.uint8)
+    eq_radius = float(np.sqrt(area / np.pi))
+    exp_radius = float(max(bw, bh) / 2)
+    return mask, float(cx), float(cy), eq_radius, exp_radius, (x, y, x + bw, y + bh), True
 
 
 def preprocess(img_path: str | Path) -> Pp:
     rgb = _read_rgb(img_path)
     h0, w0 = rgb.shape[:2]
-    cx, cy, r, detected = _detect_fov(rgb)
+    mask_full0, cx, cy, eq_r, exp_r, (x0, y0, x1, y1), detected = _detect_fov(rgb)
 
-    if detected:
-        x0 = int(max(0, np.floor(cx - r)))
-        x1 = int(min(w0, np.ceil(cx + r)))
-        y0 = int(max(0, np.floor(cy - r)))
-        y1 = int(min(h0, np.ceil(cy + r)))
-        if x1 - x0 < 8 or y1 - y0 < 8:      # degenerate crop -> treat as no detection
-            detected = False
-    if not detected:
-        x0, y0, x1, y1 = 0, 0, w0, h0
+    if x1 - x0 < 8 or y1 - y0 < 8:              # degenerate -> treat as no detection
+        detected, x0, y0, x1, y1 = False, 0, 0, w0, h0
+        mask_full0 = np.ones((h0, w0), np.uint8)
 
     crop = rgb[y0:y1, x0:x1]
-    ch, cw = crop.shape[:2]
-
-    if detected:
-        mask_full = _circle_mask((ch, cw), cx - x0, cy - y0, r)
-    else:
-        mask_full = np.ones((ch, cw), np.uint8)   # no circle found -> trust the whole frame
-
+    mask_full = mask_full0[y0:y1, x0:x1]
     img_full = (crop * mask_full[..., None]).astype(np.uint8)
 
-    img512 = cv2.resize(img_full, (OUT_SIZE, OUT_SIZE), interpolation=cv2.INTER_AREA)
-    mask512 = cv2.resize(mask_full, (OUT_SIZE, OUT_SIZE), interpolation=cv2.INTER_NEAREST)
+    # coverage: how much of the circle the FOV *should* be is actually filled.
+    # Computed here in original geometry so the resize below cannot distort it.
+    if detected:
+        coverage = float(min(1.0, int(mask_full.sum()) / max(np.pi * exp_r ** 2, 1.0)))
+    else:
+        coverage = 1.0
+
+    # pad the crop to a square before resizing so a one-sided black band is not
+    # stretched away (keeps blur / illumination honest for off-centre framing)
+    ch, cw = crop.shape[:2]
+    side = max(ch, cw)
+    pad_t, pad_l = (side - ch) // 2, (side - cw) // 2
+    sq_img = np.zeros((side, side, 3), np.uint8)
+    sq_mask = np.zeros((side, side), np.uint8)
+    sq_img[pad_t:pad_t + ch, pad_l:pad_l + cw] = img_full
+    sq_mask[pad_t:pad_t + ch, pad_l:pad_l + cw] = mask_full
+
+    img512 = cv2.resize(sq_img, (OUT_SIZE, OUT_SIZE), interpolation=cv2.INTER_AREA)
+    mask512 = cv2.resize(sq_mask, (OUT_SIZE, OUT_SIZE), interpolation=cv2.INTER_NEAREST)
     img512 = (img512 * mask512[..., None]).astype(np.uint8)
+    exp_r_512 = exp_r * (OUT_SIZE / side) if detected else OUT_SIZE / 2
 
     meta = {
         "path": str(img_path),
         "orig_size": (h0, w0),                     # (rows, cols)
         "fov_detected": bool(detected),
         "fov_center_orig": (round(cx, 1), round(cy, 1)),
-        "fov_radius_orig": round(r, 1),
-        "crop_box_xyxy": (x0, y0, x1, y1),
+        "fov_radius_orig": round(eq_r, 1),
+        "fov_expected_radius_512": round(exp_r_512, 1),
+        "fov_coverage": round(coverage, 4),
+        "crop_box_xyxy": (int(x0), int(y0), int(x1), int(y1)),
         "assumed_eye": "right",                    # ASSUMPTION - see DECISIONS.md D4
         "out_size": OUT_SIZE,
         "red_fov_threshold": RED_FOV_THRESHOLD,

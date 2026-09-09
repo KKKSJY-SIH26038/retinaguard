@@ -75,8 +75,8 @@ def deg_vignette(rgb, log):
     yy, xx = np.mgrid[0:h, 0:w]
     r = np.sqrt((yy - h / 2) ** 2 + (xx - w / 2) ** 2)
     r = r / r.max()
-    falloff = np.clip(1.15 - 0.95 * r ** 2, 0.15, 1.0)  # 1.0 centre -> ~0.2 edge
-    log.append("radial darkening: gain = clip(1.15 - 0.95*(r/rmax)^2, 0.15, 1.0)")
+    falloff = np.clip(1.10 - 2.10 * r ** 2, 0.05, 1.0)  # 1.0 centre -> ~0.3 FOV edge
+    log.append("radial darkening: gain = clip(1.10 - 2.10*(r/rmax)^2, 0.05, 1.0)")
     return np.clip(rgb.astype(np.float32) * falloff[..., None], 0, 255).astype(np.uint8)
 
 
@@ -98,7 +98,7 @@ def deg_partial(rgb, log):
 
 
 def deg_overexp(rgb, log):
-    gain, bias = 2.2, 40
+    gain, bias = 2.8, 55
     log.append(f"exposure raised: pixel*{gain} + {bias}, then clipped to 255")
     return np.clip(rgb.astype(np.float32) * gain + bias, 0, 255).astype(np.uint8)
 

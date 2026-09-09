@@ -16,4 +16,8 @@ WHAT and WHEN only. The WHY lives in docs/DECISIONS.md.
 2026-09-09 20:33 IST — Generated 6 synthetic degradations (blur, dark, vignette, jpeg, partial, overexp), one per image, into data/degraded/.
 2026-09-09 20:34 IST — Committed task2: DRIVE corpus and 6 synthetic degradations.
 2026-09-09 20:36 IST — Committed task3: preprocess.py with FOV crop and circular mask.
+2026-09-09 20:40 IST — Hardcoded UNTUNED quality thresholds: blur 250/420, illum CoV 0.45/0.20, coverage 0.90/0.965, exposure 42/200 and 70-185, blockiness 1.55/1.20.
+2026-09-09 20:42 IST — Added two scores beyond the plan's three (exposure, JPEG blockiness) so global under/over-exposure and compression are caught.
+2026-09-09 20:43 IST — Adjusted by eye after the first run: strengthened the vignette and overexp degradations and moved blockiness to full-res and coverage into preprocess, so all 6 degraded images now land on reject and no clean image does.
+2026-09-09 20:45 IST — Committed task4: assessQuality.py with 4 scores and 3-way decision.
 
