@@ -1,0 +1,18 @@
+# Datasets are never committed; manifests and logs are.
+module1_quality/data/raw/
+module1_quality/data/degraded/
+capacity_model/data/*.csv
+
+# Keep the folder structure and the disclosure logs
+!module1_quality/data/raw/.gitkeep
+!module1_quality/data/degraded/.gitkeep
+!module1_quality/data/**/*.md
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# OS
+Thumbs.db
+.DS_Store
