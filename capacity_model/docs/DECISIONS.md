@@ -50,6 +50,31 @@ under tonight's ASSUMPTION parameters, a district doing 100k
 screenings/yr needs at least 6-7 graders before wait times are finite at
 all — see the sweep in Task 4 for where the knee actually sits.
 
+## Gate-value calculation (Task 5)
+
+ASSUMPTION, per task spec, untuned: 15% of captured images are
+ungradeable regardless of who looks at them. At the default district
+(100,000 patients/yr, 2 images/patient, 4 min/image grader service —
+also an ASSUMPTION, see above):
+
+- total images/year = 100,000 × 2 = 200,000
+- ungradeable images/year = 0.15 × 200,000 = 30,000
+- grader-hours wasted/year if these reach the grading queue = 30,000 ×
+  4 min ÷ 60 = 2,000 grader-hours — a grader still has to open and look
+  at an image before rejecting it, so that time is spent either way
+- grader-hours saved/year if caught at capture instead = the same
+  2,000 grader-hours: "saved" is just "wasted" that never happens
+- patients recalled/year avoided = 30,000, using the task's literal
+  image-level rule ("each ungradeable image implies a recall"). This is
+  a deliberate simplification: a patient with BOTH eyes ungradeable
+  would be counted as two recalls here instead of one, which slightly
+  overstates the number. Not corrected tonight — flagged, not fixed.
+
+Headline (written to `docs/SLIDE5_LINE.md`):
+"With a 15% ungradeable rate (assumption), capture-time rejection saves
+~2,000 grader-hours and ~30,000 patient recalls per 100k screened per
+year."
+
 ## Time (whole session)
 
 This instance started at 22:14 IST, leaving ~76 minutes before the 11:30pm
