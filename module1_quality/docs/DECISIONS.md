@@ -67,3 +67,32 @@ These are crude stand-ins, not camera-accurate models. Their only job is to make
 each failure axis of the quality gate visible in a demo.
 
 ---
+
+## D3 — FOV detection and output size (preprocess.py)
+
+**Method:** red channel > 20 -> morphological open -> largest connected
+component -> centroid + equivalent-circle radius r = sqrt(area / pi).
+**`RED_FOV_THRESHOLD = 20`** — UNTUNED, chosen by eye; the retina disc is far
+brighter than the black surround in the red channel so the exact value barely
+matters on DRIVE. A real run tunes this per camera.
+**`OUT_SIZE = 512`** — matches the grading/quality input size in final_plan.md
+section 5.4.
+**`MIN_FOV_AREA_FRAC = 0.10`** — UNTUNED; a "largest blob" under 10% of the
+frame is treated as a failed detection.
+**Alternatives not used tonight:** Hough circle fit, Otsu threshold, a learned
+FOV segmenter. The prompt says do not over-engineer this.
+**Edge cases handled:** no blob / tiny blob / degenerate crop -> `fov_detected =
+False`, mask set to all ones, whole frame trusted; image already cropped tight
+-> crop box clamps to the image; image smaller than 512 -> upscaled by resize.
+**Known limitation:** equivalent-circle radius slightly under-reads the true
+circle when the FOV is clipped top/bottom (as in DRIVE). Acceptable for a demo.
+
+## D4 — Assumed right eye
+
+`meta.assumed_eye = "right"`. **ASSUMPTION.** DRIVE files carry no laterality.
+The compass labels in `assessQuality` (nasal / temporal / superior / inferior)
+depend on which eye it is; for a left eye, nasal and temporal swap. Tonight
+everything is reported as if every image is a right eye. A real run reads
+laterality from DICOM or file metadata.
+
+---
