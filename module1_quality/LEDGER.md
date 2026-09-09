@@ -27,4 +27,7 @@ WHAT and WHEN only. The WHY lives in docs/DECISIONS.md.
 2026-09-09 20:53 IST — Committed task6: three figures and figure README.
 2026-09-09 20:56 IST — Committed task7: recording script and demo.py.
 2026-09-09 20:57 IST — Committed task8: plain-English explainer.
+2026-09-09 21:00 IST — Finished all eight tasks with time to spare; spent the remainder on smoke tests, a requirements.txt, and the module README (no new scope).
+2026-09-09 21:02 IST — Added tests/test_module1.py (the section-10 "runtests before merge" gate); all 13 checks pass.
+2026-09-09 21:03 IST — Committed task9: smoke tests, requirements.txt, module README.
 

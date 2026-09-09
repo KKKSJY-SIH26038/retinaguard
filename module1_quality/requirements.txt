@@ -1,0 +1,10 @@
+# Module 1 feasibility slice - Python stand-in for MATLAB Image Processing Toolbox.
+# Built and tested on Python 3.14.6, Windows 11, 9 Sep 2026.
+numpy==2.5.3
+opencv-python-headless==5.0.0.93
+scikit-image==0.26.0
+scipy==1.18.1
+matplotlib==3.11.1
+pillow==12.3.0
+imageio==2.37.4
+kaggle==2.2.4          # only for build_corpus.py (DRIVE download)
