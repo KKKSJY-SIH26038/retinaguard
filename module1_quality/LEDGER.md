@@ -25,4 +25,6 @@ WHAT and WHEN only. The WHY lives in docs/DECISIONS.md.
 2026-09-09 20:49 IST — Committed task5: enhance.py with staged pipeline and before/after scores.
 2026-09-09 20:52 IST — Exported three figures (fig1 reject+feedback, fig2 enhance before/after, fig3 score scatter) at 2600-3000px wide with baked-in captions.
 2026-09-09 20:53 IST — Committed task6: three figures and figure README.
+2026-09-09 20:56 IST — Committed task7: recording script and demo.py.
+2026-09-09 20:57 IST — Committed task8: plain-English explainer.
 
