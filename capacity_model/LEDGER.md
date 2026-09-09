@@ -8,3 +8,4 @@
 2026-09-09 22:27 IST — Ran sweep (num_graders 2-8) and heatmap (graders x service-minutes); found knee at 6 graders (backlog drops from ~19,773 at c=5 to 4 at c=6), matching Erlang-C's stability threshold of ~5.56 Erlangs; saved fig4_backlog_vs_graders.png and fig5_sweep_heatmap.png.
 2026-09-09 22:27 IST — Computed gate-value: 30,000 ungradeable images/yr at 15% (assumption) implies ~2,000 grader-hours and ~30,000 patient recalls per 100k screened per year saved by capture-time rejection; wrote docs/SLIDE5_LINE.md.
 2026-09-09 22:28 IST — Wrote docs/EXPLAINER.md (plain-English description of the capacity model); Part 2 never ran so no second paragraph needed.
+2026-09-09 22:28 IST — Part 1 (Tasks 0-5, 9) complete with ~60 min to spare before the 11:30pm hard stop; pushing krisha/capacity now.
