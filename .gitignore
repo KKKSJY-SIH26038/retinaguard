@@ -1,6 +1,7 @@
 # Datasets are never committed; manifests and logs are.
 module1_quality/data/raw/
 module1_quality/data/degraded/
+module1_quality/data/_dl/
 capacity_model/data/*.csv
 
 # Keep the folder structure and the disclosure logs

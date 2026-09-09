@@ -35,3 +35,35 @@ match section 10 of `final_plan.md` exactly, so every slide claim stays true.
 functions for a feasibility demo. Not verified against MATLAB output.
 
 ---
+
+## D1 — Image corpus: DRIVE test set as the "good" 20
+
+**Chosen:** the 20 DRIVE test images (Staal et al. 2004), Kaggle mirror
+`andrewmvd/drive-digital-retinal-images-for-vessel-extraction`, ~28 MB.
+**Alternatives:** DRIVE training set, STARE, APTOS, IDRiD.
+**Why:** no account friction via the Kaggle API key already on this laptop;
+under 30 MB; DRIVE images come from a real Dutch DR screening programme, which
+is the right setting for this project; the test split is small and uniform.
+**ASSUMPTION:** the "select 20 visually clean images" step was not done by a
+human eye tonight. DRIVE test images are taken as-is because they were curated
+for a segmentation benchmark and are uniformly in focus and well framed. A real
+run would hand-check them.
+
+## D2 — Six synthetic degradations
+
+One defect per image, applied in `build_corpus.py`, logged in
+`data/DEGRADATION_LOG.md`, disclosed as **SYNTHETIC** on the slide.
+
+| Defect | Parameter | Note |
+|---|---|---|
+| blur | Gaussian sigma = 3.5 | UNTUNED, mid of the prompt's 3-4 range |
+| dark | exposure x0.40 | UNTUNED, "reduced ~60%" |
+| vignette | gain = clip(1.15 - 0.95 r^2, 0.15, 1.0) | UNTUNED, hand-shaped falloff |
+| jpeg | JPEG quality = 15 | UNTUNED, low end of the prompt's "~15" |
+| partial | left 25% of width blacked out | matches the prompt |
+| overexp | pixel x2.2 + 40, clipped | UNTUNED, chosen so highlights clip |
+
+These are crude stand-ins, not camera-accurate models. Their only job is to make
+each failure axis of the quality gate visible in a demo.
+
+---
