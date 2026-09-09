@@ -154,6 +154,27 @@ def _exposure(g: np.ndarray, m: np.ndarray) -> tuple[float, float]:
     return float(vals.mean()), float(np.mean(vals >= 250))
 
 
+def illumination_overlay(pp: Pp) -> np.ndarray:
+    """
+    512x512 float map: every FOV pixel set to the mean green of the 16-cell
+    (8 sector x 2 ring) block it belongs to, else NaN. For figure 1.
+    """
+    g, m = _masked_green(pp)
+    cx, cy, r = _fov_geometry(m)
+    ys, xs = np.mgrid[0:g.shape[0], 0:g.shape[1]]
+    dist = np.sqrt((xs - cx) ** 2 + (ys - cy) ** 2)
+    ang = (np.degrees(np.arctan2(ys - cy, xs - cx)) + 360) % 360
+    sector = np.floor(ang / (360 / N_SECTORS)).astype(int) % N_SECTORS
+    ring = np.clip((dist > 0.5 * r).astype(int), 0, N_RINGS - 1)
+    out = np.full(g.shape, np.nan)
+    for s in range(N_SECTORS):
+        for rg in range(N_RINGS):
+            cell = m & (sector == s) & (ring == rg)
+            if cell.sum() >= 30:
+                out[cell] = g[cell].mean()
+    return out
+
+
 def _blockiness(img_full: np.ndarray) -> float:
     """
     JPEG-artifact score on the FULL-RES image (before the 512 resize smears the

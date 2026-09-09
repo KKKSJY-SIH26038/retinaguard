@@ -23,4 +23,6 @@ WHAT and WHEN only. The WHY lives in docs/DECISIONS.md.
 2026-09-09 20:47 IST — Hardcoded UNTUNED enhancement settings: CLAHE clip 2.0 tile 8, flat-field sigma 55, denoise strength 3.
 2026-09-09 20:48 IST — Verified enhancement raises the sharpness score on all 10 test images, so the denoise strength was left light and not reduced further.
 2026-09-09 20:49 IST — Committed task5: enhance.py with staged pipeline and before/after scores.
+2026-09-09 20:52 IST — Exported three figures (fig1 reject+feedback, fig2 enhance before/after, fig3 score scatter) at 2600-3000px wide with baked-in captions.
+2026-09-09 20:53 IST — Committed task6: three figures and figure README.
 
