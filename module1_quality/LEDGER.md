@@ -20,4 +20,7 @@ WHAT and WHEN only. The WHY lives in docs/DECISIONS.md.
 2026-09-09 20:42 IST — Added two scores beyond the plan's three (exposure, JPEG blockiness) so global under/over-exposure and compression are caught.
 2026-09-09 20:43 IST — Adjusted by eye after the first run: strengthened the vignette and overexp degradations and moved blockiness to full-res and coverage into preprocess, so all 6 degraded images now land on reject and no clean image does.
 2026-09-09 20:45 IST — Committed task4: assessQuality.py with 4 scores and 3-way decision.
+2026-09-09 20:47 IST — Hardcoded UNTUNED enhancement settings: CLAHE clip 2.0 tile 8, flat-field sigma 55, denoise strength 3.
+2026-09-09 20:48 IST — Verified enhancement raises the sharpness score on all 10 test images, so the denoise strength was left light and not reduced further.
+2026-09-09 20:49 IST — Committed task5: enhance.py with staged pipeline and before/after scores.
 

@@ -144,3 +144,28 @@ a continuous quality score. `imgEnhanced` is left `None` here and filled by
 `enhance.py` in the orchestrator.
 
 ---
+
+## D6 — Enhancement pipeline (enhance.py)
+
+Stages, in order, each kept for display: CLAHE on the Lab L channel -> flat-field
+-> light non-local-means denoise -> re-apply the FOV mask.
+
+| Parameter | Value | Basis |
+|---|---|---|
+| `CLAHE_CLIP` | 2.0 | UNTUNED; "visible but not garish" per the prompt |
+| `CLAHE_TILE` | 8x8 | UNTUNED; standard tiling for a 512px image |
+| `FLATFIELD_SIGMA` | 55 | UNTUNED; ~ 512/9, large enough to model only slow background shading |
+| `DENOISE_H` | 3 | UNTUNED; kept light. Checked on all 10 test images: the blur score rises after enhancement, so denoising is not softening the image and no reduction was needed. |
+
+**MATLAB mapping:** `adapthisteq` (L channel) -> `imflatfield` -> `imnlmfilt`.
+Tonight's flat-field is a per-channel divide by a Gaussian-blurred background
+rescaled to the background mean - the same idea as `imflatfield`, not the same
+code.
+
+**Result (docs/ENHANCE_TABLE.md):** on the 6 degraded + 4 borderline images,
+8/10 move the right way - illumination CoV falls and sharpness rises. The two
+that do not are the 25%-occluded image (flat-field rings the hard black edge)
+and the hard-clipped over-exposed image (clipped detail cannot be recovered).
+Both are honest limits of enhancement, not bugs.
+
+---
