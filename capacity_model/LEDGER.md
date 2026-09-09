@@ -7,3 +7,4 @@
 2026-09-09 22:22 IST — Ran erlang_c.py against event_sim.py at c=3,5,7; c=7 (only stable case) agreed within 1.9%, well under the 10% target; c=3/5 correctly show as overloaded/no-steady-state in both.
 2026-09-09 22:27 IST — Ran sweep (num_graders 2-8) and heatmap (graders x service-minutes); found knee at 6 graders (backlog drops from ~19,773 at c=5 to 4 at c=6), matching Erlang-C's stability threshold of ~5.56 Erlangs; saved fig4_backlog_vs_graders.png and fig5_sweep_heatmap.png.
 2026-09-09 22:27 IST — Computed gate-value: 30,000 ungradeable images/yr at 15% (assumption) implies ~2,000 grader-hours and ~30,000 patient recalls per 100k screened per year saved by capture-time rejection; wrote docs/SLIDE5_LINE.md.
+2026-09-09 22:28 IST — Wrote docs/EXPLAINER.md (plain-English description of the capacity model); Part 2 never ran so no second paragraph needed.
